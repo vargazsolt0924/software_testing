@@ -1,4 +1,4 @@
-package org.example;
+package hu.nye.st;
 
 public class Main {
     public static void main(String[] args) {
