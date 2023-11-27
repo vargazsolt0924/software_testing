@@ -18,5 +18,31 @@ Feature: Search on the articles page
       | Android   | 4         |
 
 
+    Scenario Outline: Filter for tag
+      Given the 'Articles' button is clicked
+      When I narrow the tag to '<checkboxName>'
+      And I click the highlighted checkbox
+      Then I see <cardCount> article card
+
+
+      Examples:
+        | checkboxName  | cardCount |
+        | Banks         | 1         |
+
+
+  Scenario Outline: Select the one language filter
+    Given the 'Articles' button is clicked
+    Then the 'More Filters' option is opened
+    And the Language Filter Dropdown is opened
+    When I select the '<checkboxName>' checkbox
+    Then I see <cardCount> article card
+
+    Examples:
+      | checkboxName | cardCount |
+      | Spanish      |  1        |
+
+
+
+
 
 

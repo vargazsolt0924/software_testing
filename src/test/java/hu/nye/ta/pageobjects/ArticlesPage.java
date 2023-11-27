@@ -1,17 +1,12 @@
 package hu.nye.ta.pageobjects;
 
 import hu.nye.ta.factory.WebDriverFactory;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -26,17 +21,34 @@ public class ArticlesPage {
     @FindBy(css = ".evnt-articles-wrapper .evnt-article-name")
     private List<WebElement> articleCardTitles;
 
-    private WebDriver webDriver;
 
-    private WebDriverFactory webDriverFactory;
+    @FindBy(id = "filter_tag")
+    private WebElement tagFilter;
+
+    @FindBy(css = ".evnt-filter-menu.show .evnt-search")
+    private WebElement tagFilterInput;
+
+    @FindBy(css = ".highlight-text")
+    private WebElement tagFilterHighlightedItem;
+
+    @FindBy(xpath = "//*[@id=\"agenda_filters\"]/div/div[1]/div[1]/div/div/div[4]")
+    private WebElement moreFiltersOption;
+
+    @FindBy(id = "filter_language")
+    private WebElement languageFilter;
+
+    @FindBy(css = ".evnt-filter-item")
+    private WebElement languageFilterCheckBox;
+
+
+    private final WebDriver webDriver;
 
     public ArticlesPage(WebDriverFactory webDriverFactory) {
-        var webDriver = webDriverFactory.getDriver();
+        this.webDriver = webDriverFactory.getDriver();
         PageFactory.initElements(webDriver, this);
-        this.webDriver = webDriver;
     }
 
-    public void searchForInput(String input){
+    public void searchForInput(String input) {
         searchInput.sendKeys(input);
     }
 
@@ -44,11 +56,34 @@ public class ArticlesPage {
         return articleCards;
     }
 
-    public List<String> getArticleCardTitles(){
-        List<String> cardTitles = new ArrayList<>();
-        for (WebElement card: articleCardTitles) {
-            cardTitles.add(card.getText());
-        }
-        return cardTitles;
+    public List<String> getArticleCardTitles() {
+        return articleCardTitles.stream()
+                .map(WebElement::getText).toList();
     }
+
+    public WebElement getTagFilter() {
+        return tagFilter;
+    }
+
+    public WebElement getTagFilterInput() {
+        return tagFilterInput;
+    }
+
+    public WebElement getTagFilterHighlightedItem() {
+        return tagFilterHighlightedItem;
+    }
+
+    public WebElement getMoreFiltersOption() {
+        return moreFiltersOption;
+    }
+
+    public WebElement getLanguageFilter() {
+        return languageFilter;
+    }
+
+    public WebElement getLanguageFilterCheckBox() {
+        return languageFilterCheckBox;
+    }
+
+
 }

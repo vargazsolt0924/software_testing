@@ -12,6 +12,8 @@ public class WebDriverFactory {
 
     private WebDriver driver;
 
+    private static final Duration IMPLICIT_WAIT_DURATION = Duration.ofSeconds(10);
+
     public WebDriver getDriver(){
         if(Objects.isNull((driver))){
             driver = setUpWebDriver();
@@ -24,7 +26,8 @@ public class WebDriverFactory {
         WebDriver driver = new ChromeDriver(
                 new ChromeOptions().addArguments("--remote-allow-origins=*")
         );
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver.manage().timeouts().implicitlyWait(IMPLICIT_WAIT_DURATION);
+        driver.manage().window().maximize();
         return driver;
     }
 
@@ -34,4 +37,5 @@ public class WebDriverFactory {
             driver = null;
         }
     }
+
 }

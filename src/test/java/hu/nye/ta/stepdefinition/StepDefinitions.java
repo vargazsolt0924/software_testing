@@ -8,12 +8,20 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+import java.time.Duration;
+
+import static hu.nye.ta.helpers.Addresses.ARTICLES_PAGE;
+import static hu.nye.ta.helpers.Addresses.MAIN_PAGE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 
 public class StepDefinitions {
@@ -32,8 +40,8 @@ public class StepDefinitions {
         WebDriver driver = webDriverFactory.getDriver();
 
         switch (pageName){
-            case "Articles" -> driver.get("https://wearecommunity.io/articles");
-            case "Main" -> driver.get("https://wearecommunity.io/");
+            case "Articles" -> driver.get(ARTICLES_PAGE);
+            case "Main" -> driver.get(MAIN_PAGE);
         }
 
     }
@@ -45,14 +53,22 @@ public class StepDefinitions {
 
     @Then("I see {int} article card")
     public void iSeeArticleCard(int expectedCardCount) throws InterruptedException {
-        for (int i = 0; i < 3; i++) {
-            var actualCardCount = articlesPage.getArticleCards().size();
-            if(actualCardCount == expectedCardCount){
-                return;
-            }
-            Thread.sleep(1000);
+        WebDriver driver = webDriverFactory.getDriver();
+        FluentWait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+                .withTimeout(Duration.ofSeconds(3))
+                .pollingEvery(Duration.ofSeconds(1))
+                .ignoring(NoSuchElementException.class);
+
+        try{
+            wait.until(new ExpectedCondition<Boolean>() {
+                @Override
+                public Boolean apply(WebDriver driver){
+                    return articlesPage.getArticleCards().size() == expectedCardCount;
+                }
+            });
+        }catch (TimeoutException e){
+            Assert.fail("Expected card count did not match actual card count");
         }
-        Assert.fail("Expected card count did not match with actual card count.");
     }
 
     @Given("the {string} button is clicked")
@@ -65,9 +81,45 @@ public class StepDefinitions {
     @And("All cards contain the {string} word")
     public void allCardsContainTheCardNameWord(String word) {
         for(String title : articlesPage.getArticleCardTitles()){
-            if(!title.contains(word)){
-                Assert.fail();
-            }
+            assertThat(title.toLowerCase(), containsString(word.toLowerCase()));
         }
     }
+
+    @When("I narrow the tag to {string}")
+    public void iNarrowTheTagToBanks(String tag) {
+        articlesPage.getTagFilter().click();
+        articlesPage.getTagFilterInput().sendKeys(tag);
+    }
+
+    @And("I click the highlighted checkbox")
+    public void iClickTheHighlightedCheckbox() {
+        articlesPage.getTagFilterHighlightedItem().click();
+    }
+
+    @Then("the {string} option is opened")
+    public void theMoreFiltersOptionIsOpened(String buttonName) {
+        switch (buttonName){
+            case "More Filters" -> articlesPage.getMoreFiltersOption().click();
+        }
+    }
+
+    @And("the Language Filter Dropdown is opened")
+    public void theFilterDropdownIsOpened() throws InterruptedException {
+        Thread.sleep(1000);
+        articlesPage.getLanguageFilter().click();
+    }
+
+    @When("I select the {string} checkbox")
+    public void iSelectTheLanguageCheckBox(String language) throws InterruptedException {
+        Thread.sleep(1000);
+        WebElement checkbox = articlesPage.getLanguageFilterCheckBox();
+        if (checkbox != null && checkbox.getText().contains(language)) {
+            checkbox.click();
+        } else {
+            Assert.fail("Checkbox for language " + language + " not found or cannot be selected");
+        }
+    }
+
+
+
 }

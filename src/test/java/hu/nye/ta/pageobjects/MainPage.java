@@ -13,11 +13,11 @@ public class MainPage {
     @FindBy(xpath = "//*[@id=\"app\"]/header/div/div/ul[1]/li[6]/a")
     private WebElement articlesButton;
 
-    private WebDriver webDriver;
+    private final WebDriver webDriver;
+
     public MainPage(WebDriverFactory webDriverFactory) {
-        var webDriver = webDriverFactory.getDriver();
+        this.webDriver = webDriverFactory.getDriver();
         PageFactory.initElements(webDriver, this);
-        this.webDriver = webDriver;
     }
 
     public WebElement getArticlesButton() {
