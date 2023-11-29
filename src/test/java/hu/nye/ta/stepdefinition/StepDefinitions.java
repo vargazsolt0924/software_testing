@@ -13,10 +13,12 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
+import java.util.List;
 
 import static hu.nye.ta.helpers.Addresses.ARTICLES_PAGE;
 import static hu.nye.ta.helpers.Addresses.MAIN_PAGE;
@@ -111,15 +113,31 @@ public class StepDefinitions {
 
     @When("I select the {string} checkbox")
     public void iSelectTheLanguageCheckBox(String language) throws InterruptedException {
-        Thread.sleep(1000);
-        WebElement checkbox = articlesPage.getLanguageFilterCheckBox();
-        if (checkbox != null && checkbox.getText().contains(language)) {
-            checkbox.click();
-        } else {
+        WebDriver driver = webDriverFactory.getDriver();
+        FluentWait<WebDriver> wait = new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(10))
+                .pollingEvery(Duration.ofMillis(500))
+                .ignoring(NoSuchElementException.class);
+
+        List<WebElement> checkboxes = articlesPage.getCheckBoxName();
+
+        boolean checkboxFound = false;
+
+        for (WebElement checkbox : checkboxes) {
+            wait.until(ExpectedConditions.visibilityOf(checkbox));
+
+            String actualCheckboxName = checkbox.getText();
+            System.out.println("Actual Checkbox Name: " + actualCheckboxName);
+
+            if (actualCheckboxName.toLowerCase().contains(language.toLowerCase())) {
+                checkbox.click();
+                checkboxFound = true;
+                break;
+            }
+        }
+
+        if (!checkboxFound) {
             Assert.fail("Checkbox for language " + language + " not found or cannot be selected");
         }
     }
-
-
-
 }

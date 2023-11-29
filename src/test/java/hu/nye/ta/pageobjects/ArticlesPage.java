@@ -40,6 +40,8 @@ public class ArticlesPage {
     @FindBy(css = ".evnt-filter-item")
     private WebElement languageFilterCheckBox;
 
+    @FindBy(css = ".evnt-filter-item .form-check-label")
+    private List<WebElement> checkBoxName;
 
     private final WebDriver webDriver;
 
@@ -85,5 +87,7 @@ public class ArticlesPage {
         return languageFilterCheckBox;
     }
 
-
+    public List<WebElement> getCheckBoxName() {
+        return checkBoxName;
+    }
 }
